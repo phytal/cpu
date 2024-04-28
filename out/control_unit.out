@@ -1,0 +1,9 @@
+R-Type
+opcode: 00, rd: 00, rs: 00, rt: 00, L:    0, pc_src: 0, result_src: x, mem_write: 0, reg_write: 1, addr_src: 0, alu_srcA: 0, alu_srcB: 0, alu_op: 00, alu_pass: 0, halt: 0, in_signal: 0, out_signal: 0
+R-Type
+L-Type
+opcode: 01, rd: 00, rs: 00, rt: 00, L:    2, pc_src: 0, result_src: x, mem_write: 0, reg_write: 1, addr_src: 0, alu_srcA: 0, alu_srcB: 1, alu_op: 01, alu_pass: 0, halt: 0, in_signal: 0, out_signal: 0
+L-Type
+BRR
+opcode: 0f, rd: 00, rs: 00, rt: 00, L:    3, pc_src: 1, result_src: x, mem_write: 0, reg_write: 0, addr_src: 0, alu_srcA: 1, alu_srcB: 2, alu_op: 00, alu_pass: 0, halt: 0, in_signal: 0, out_signal: 0
+test/control_unit_tb.sv:95: $finish called at 60000 (1ps)

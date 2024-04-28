@@ -1,0 +1,3 @@
+Test case 1: Write to register 3, read from register 3
+Read data from register 3: 123456789abcdef0
+test/register_file_tb.sv:55: $finish called at 30 (1s)
