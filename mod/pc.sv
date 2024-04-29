@@ -1,4 +1,5 @@
 module program_counter (
+    input logic [2:0] state,
     input logic clk,
     input logic reset,
     input logic [63:0] pc_plus_4,
@@ -10,7 +11,7 @@ module program_counter (
     always_ff @(posedge clk or posedge reset) begin
         if (reset)
             pc <= 0;
-        else begin
+        else if (state == 3'b000) begin
             if (pc_src == 0)
                 pc <= pc_plus_4;
             else if (pc_src == 1)

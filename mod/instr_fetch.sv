@@ -1,4 +1,5 @@
 module fetch (
+    input logic [2:0] state,
     input clk,
     input reset,
     input [31:0] instr_in,
@@ -9,7 +10,7 @@ module fetch (
     always @(posedge clk or posedge reset) begin
         if (reset)
             instr_reg <= 32'h0;
-        else
+        else if (state == 3'b000)
             instr_reg <= instr_in;
     end
 

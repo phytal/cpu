@@ -2,7 +2,7 @@
 `define cpu_module
 
 `include "mod/ram.sv"
-`include "mod/instr_decode.sv"
+// `include "mod/instr_decode.sv"
 `include "mod/instr_fetch.sv"
 `include "mod/control_unit.sv"
 `include "mod/pc.sv"
@@ -34,12 +34,98 @@ module cpu (
     output logic out_signal,
     output logic[63:0] out_data   
 );  
+    // logic [2:0] state; // 0: fetch, 1: decode, 2: execute, 3: writeback
+
+    // // Define states
+    // parameter FETCH = 3'b000;
+    // parameter DECODE = 3'b001;
+    // parameter EXECUTE = 3'b010;
+    // parameter WRITEBACK = 3'b011;
+    // Define states for the multicycle processor
+    typedef enum logic [2:0] {
+        STATE_IF = 3'b000, // Instruction Fetch
+        STATE_ID = 3'b001, // Instruction Decode
+        STATE_EX = 3'b010, // Execution
+        STATE_MEM = 3'b011, // Memory Access
+        STATE_WB = 3'b100  // Write-back
+    } state_t;
+    
+    // State register and next state logic
+    state_t state, next_state;
+
+    always_ff @(posedge clk or posedge reset)
+    begin
+        if (reset)
+            state <= STATE_IF; // Initial state
+        else
+            state <= next_state; // Update state based on next_state
+        $display("Current state: %0d", state);
+        $display("PC: %0h", pc);
+        $display("Instruction: %0b", instr);
+        $display("Registers: %0h, %0h, %0h, %0d", rd, rs, rt, L);
+        $display("Register data: %0h, %0h, %0h", rd_data, rs_data, rt_data);
+        $display("ALU operands: %0h, %0h", operand1, operand2);
+        $display("ALU result: %0h", alu_result);
+        $display("halt: %0d", _halt);
+    end
+
+    // Logic to determine next state based on current state
+    always_comb begin
+        case (state)
+            STATE_IF: next_state = STATE_ID;
+            STATE_ID: next_state = STATE_EX;
+            STATE_EX: next_state = STATE_MEM;
+            STATE_MEM: next_state = STATE_WB;
+            STATE_WB: next_state = STATE_IF; // Go back to IF for next instruction
+            default: next_state = STATE_IF; // Default to IF state
+        endcase
+    end
+
+    // // State control signals
+    // always_ff @(posedge clk, negedge reset) begin
+    //     if (reset) begin
+    //         state <= FETCH;
+    //     end else begin
+    //         case (state)
+    //             FETCH: begin
+    //                 state_fetch <= 1;
+    //                 // Other state control signals set to 0
+    //                 if (fetch_done) begin // Replace fetch_done with an appropriate condition
+    //                     state <= DECODE;
+    //                 end
+    //             end
+    //             DECODE: begin
+    //                 state_decode <= 1;
+    //                 // Other state control signals set to 0
+    //                 if (decode_done) begin // Replace decode_done with an appropriate condition
+    //                     state <= EXECUTE;
+    //                 end
+    //             end
+    //             EXECUTE: begin
+    //                 state_execute <= 1;
+    //                 // Other state control signals set to 0
+    //                 if (execute_done) begin // Replace execute_done with an appropriate condition
+    //                     state <= WRITEBACK;
+    //                 end
+    //             end
+    //             WRITEBACK: begin
+    //                 state_writeback <= 1;
+    //                 // Other state control signals set to 0
+    //                 if (writeback_done) begin // Replace writeback_done with an appropriate condition
+    //                     state <= FETCH;
+    //                 end
+    //             end
+    //             default: state <= FETCH; // Default to FETCH state in case of unknown state
+    //         endcase
+    //     end
+    // end
+
     // Control Unit
     logic [4:0] op;
     logic [4:0] rd;
     logic [4:0] rs;
     logic [4:0] rt;
-    logic signed [11:0] L;
+    logic [11:0] L;
 
     logic pc_src;
     logic result_src;
@@ -53,6 +139,7 @@ module cpu (
     logic in;
     logic out;
     logic alu_pass;
+    logic _halt;
 
     control_unit control_unit (
         .clk(clk),
@@ -73,6 +160,7 @@ module cpu (
         .alu_srcB(alu_srcB),
         .alu_op(alu_op),
         .alu_pass(alu_pass),
+        .halt(_halt),
         .in_signal(in),
         .out_signal(out)
     );
@@ -85,6 +173,7 @@ module cpu (
     logic [63:0] pc;
 
     program_counter prog_c (
+        .state(state),
         .clk(clk),
         .reset(reset),
         .pc_plus_4(pc_plus_4),
@@ -113,7 +202,7 @@ module cpu (
         .rw_addr(alu_result),
         .rw_data_in(rw_data_in),
         .rw_write_en(mem_write),
-        .r_data_out(r_data_out),
+        .r_data_out(instr),
         .r_error(r_error),
         .rw_data_out(rw_data_out),
         .rw_error(rw_error)
@@ -124,38 +213,15 @@ module cpu (
     // Instruction Fetch
     logic [31:0] instr;
 
-    fetch fetch (
-        .clk(clk),
-        .reset(reset),
-        .instr_in(r_data_out),
-        .instr_out(instr)
-    );
-
-    wire decode_error;
-    wire halt_signal;
-
-    // decode decode (
-    //     .instr(r_data_out),
+    // fetch fetch (
     //     .clk(clk),
     //     .reset(reset),
-    //     .ready(ready),
-    //     .error(decode_error),
-    //     .halt(halt_signal),
-    //     .pc(next_pc),
-    //     .new_pc(pc_branch)
+    //     .instr_in(r_data_out),
+    //     .instr_out(instr)
     // );
-    
 
-
-    // decode decode (
-    //     .instr(instr),
-    //     .pc(next_pc),
-    //     .op(op),
-    //     .rd(rd),
-    //     .rs(rs),
-    //     .rt(rt),
-    //     .L(L)
-    // );
+    wire decode_error;
+    // wire halt_signal;
 
     // Register File
     logic [63:0] rd_data;
@@ -164,6 +230,7 @@ module cpu (
     logic [63:0] stack_pointer;
 
     register_file rf (
+        .state(state),
         .clk(clk),
         .reset(reset),
         .read_reg1(rd),
@@ -188,8 +255,8 @@ module cpu (
         // MUX for ALU operands
         case (alu_srcA)
             2'b00: operand1 = rs_data;
-            2'b01: operand1 = rt_data;
-            2'b10: operand1 = rd_data;
+            2'b01: operand1 = rd_data;
+            2'b10: operand1 = pc;
             2'b11: operand1 = stack_pointer;
         endcase
 
@@ -228,24 +295,24 @@ module cpu (
     // );
 
     // IO Device
-    // logic [63:0] io_data;
-    // logic in_ready;
-    // logic out_ready;
+    logic [63:0] io_data;
+    logic in_ready;
+    logic out_ready;
 
-    // io_device io (
-    //     .clk(clk),
-    //     .reset(reset),
-    //     .in_data(in_data),
-    //     .in_signal(in),
-    //     .out_signal(out),
-    //     .out_data(io_data),
-    //     .in_ready(in_ready),
-    //     .out_ready(out_ready)
-    // );
+    io_device io (
+        .clk(clk),
+        .reset(reset),
+        .in_data(in_data),
+        .in_signal(in),
+        .out_signal(out),
+        .out_data(io_data),
+        .in_ready(in_ready),
+        .out_ready(out_ready)
+    );
 
     assign out_data = rs_data;
 
-    assign halt = error | halt_signal;
+    assign halt = _halt;
     assign error = r_error | rw_error | decode_error | alu_error | fp_error;
 endmodule
 

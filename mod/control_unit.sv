@@ -115,7 +115,7 @@ module control_unit (
                 _reg_write <= 1'b1;
                 // immediate_src <= 1'b1;
                 _addr_src <= 1'b0;
-                _alu_srcA <= 2'b00;
+                _alu_srcA <= 2'b01;
                 _alu_srcB <= 2'b01;
                 _alu_op <= _opcode; 
             end

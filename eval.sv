@@ -33,18 +33,19 @@ module evaluator();
     initial begin
         // ======================================================
         // reset the processor and load the tko file into the memory
-        `RESET_AND_LOAD_FILE("tko/nothing.tko", clk, reset, cpu_inst.memory.bytes);
+        `RESET_AND_LOAD_FILE("tko/basic_add.tko", clk, reset, cpu_inst.memory.bytes);
     
-        // display the memory contents
+        // // display the memory contents
         // for (int i = 0; i < 40; i++) begin
         //     $display("Memory[%d]: %d", i, cpu_inst.memory.bytes[i]);
         // end
 
-         // Monitor outputs
+       // Monitor outputs
         while (!halt) begin
+        // for (int i = 0; i < 100; i++) begin
             // Display output data when out_signal is active
             if (out_signal) begin
-                $display("Output data: %h", out_data);
+                $display("OUTPUT DATA: %h", out_data);
             end
 
             // Add more monitoring as needed
@@ -52,6 +53,12 @@ module evaluator();
             // Wait for a clock cycle
             #1;
         end
+        // #100;
+
+        // Simulation finished
+        $display("Simulation finished. Halt signal received.");
+        // $display("output %d\n", out_data);
+        // $display("halted %h\n", halt);
 
 
         $finish;
