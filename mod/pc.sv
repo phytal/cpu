@@ -11,7 +11,7 @@ module program_counter (
     always_ff @(posedge clk or posedge reset) begin
         if (reset)
             pc <= 0;
-        else if (state == 3'b000) begin
+        else if (state == 3'b011) begin
             if (pc_src == 0)
                 pc <= pc_plus_4;
             else if (pc_src == 1)

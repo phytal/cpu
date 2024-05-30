@@ -41,24 +41,34 @@ module evaluator();
         // end
 
        // Monitor outputs
-        while (!halt) begin
-        // for (int i = 0; i < 100; i++) begin
-            // Display output data when out_signal is active
-            if (out_signal) begin
-                $display("OUTPUT DATA: %h", out_data);
+        // while (!halt) begin
+        // // for (int i = 0; i < 100; i++) begin
+        //     // Display output data when out_signal is active
+        //     if (out_signal) begin
+        //         $display("OUTPUT DATA: %h", out_data);
+        //         $display("HALT: %h", halt);
+        //     end
+
+        //     // Add more monitoring as needed
+
+        //     // Wait for a clock cycle
+        //     #1;
+        // end
+        // // #100;
+
+        // // Simulation finished
+        // $display("Simulation finished. Halt signal received.");
+        // $display("OUTPUT DATA: %h", out_data);
+        // $display("OUTPUT SIGNAL: %h", out_signal);
+        // $display("HALT: %h", halt);
+        // // $display("output %d\n", out_data);
+        // // $display("halted %h\n", halt);
+         while(halt != 1) begin
+            if(out_signal == 1) begin
+                $display("Output: %d", out_data);
             end
-
-            // Add more monitoring as needed
-
-            // Wait for a clock cycle
-            #1;
-        end
-        // #100;
-
-        // Simulation finished
-        $display("Simulation finished. Halt signal received.");
-        // $display("output %d\n", out_data);
-        // $display("halted %h\n", halt);
+            #10;
+        end 
 
 
         $finish;

@@ -49,7 +49,7 @@ module ram (
         end 
 
         // otherwise we are actually doing something with the memory
-        else if (state == 3'b100 & rw_write_en & rw_addr <= (MEM_SIZE - 8)) begin
+        else if (state == 3'b011 & rw_write_en & rw_addr <= (MEM_SIZE - 8)) begin
             if (rw_write_en) begin
                 bytes[rw_addr] <= rw_data_in[7:0];
                 bytes[rw_addr + 1] <= rw_data_in[15:8];

@@ -18,14 +18,12 @@ module register_file (
 reg [63:0] registers [31:0]; // 32 registers, each 64 bits wide
 
 always @(posedge clk or posedge reset)
-// always @(*)
 begin
     if (reset) begin
         for (int i = 0; i < 32; i = i + 1)
             registers[i] <= 64'h0; // Initialize all registers to zero
     end
-    // else if (write_en && (write_reg != 5'b00000)) // Write to register file
-    else if (state == 3'b100 && write_en) // Write to register file
+    else if (state == 3'b011 && write_en) // Write to register file
         registers[write_reg] <= write_data; // Write data to specified register
     
 end
